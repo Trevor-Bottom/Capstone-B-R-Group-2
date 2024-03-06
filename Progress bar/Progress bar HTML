@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flask Progress Bar Example</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  $("#startTask").click(function(){
+    $.getJSON("/start-task", function(data){
+      alert(data.message);
+      checkProgress();
+    });
+  });
+
+  function checkProgress() {
+    setInterval(function(){
+      $.getJSON("/progress", function(data) {
+        $("#progressBar").val(data.progress);
+        if(data.progress >= 100) {
+          clearInterval(this);
+        }
+      });
+    }, 1000);
+  }
+});
+</script>
+</head>
+<body>
+<button id="startTask">Start Task</button>
+<progress id="progressBar" value="0" max="100"></progress>
+</body>
+</html>
