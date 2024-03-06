@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VIN Decoder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #0A2442;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2 {
+            color: white;
+        }
+        form {
+            margin-top: 40px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 35%;
+            height: 200px;
+            padding: 10px;
+            margin: 0 auto;
+            display: block;
+            background-color: white;
+            color: black;
+        }
+        input[type="submit"] {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: white;
+            color: #0A2442;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0A2442;
+            color: white;
+        }
+        a {
+            display: block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+        #status {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #processing {
+            display: none;
+            margin-top: 20px;
+        }
+        #complete {
+            display: none;
+            color: green;
+            margin-top: 20px;
+        }
+        .logo {
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        function showProcessing() {
+            document.getElementById('processing').style.display = 'block';
+        }
+
+        function showComplete() {
+            document.getElementById('processing').style.display = 'none';
+            document.getElementById('complete').style.display = 'block';
+        }
+
+        document.querySelector('form').addEventListener('submit', function() {
+            document.querySelector('#status').textContent = 'Processing...';
+            showProcessing();  
+        });
+
+        setTimeout(function() {
+            showComplete();  
+            document.getElementById('download_link').style.display = 'block'; 
+        }, 5000);  
+    </script>
+</head>
+<body>
+    <h1>Brown & Riding VIN Decoder</h1>
+    <form action="/submit" method="post">
+        <label for="vin_numbers">Enter VIN numbers:</label>
+        <textarea id="vin_numbers" name="vin_numbers" rows="10" cols="50"></textarea>
+        <input type="submit" value="Decode">
+    </form>
+    <h2 id="status"></h2>
+    <a id="download_link" href="vehicle_data.csv" download="vehicle_data.csv" style="display: none;">Download Vehicle Data CSV</a>
+    <h2 id="processing">Processing...</h2>
+    <h2 id="complete">Complete</h2>
+</body>
+</html>
