@@ -69,6 +69,50 @@ def submit():
     df.loc[df['Body Class'].str.contains("Body Class:"), 'Body Class'] = "--"
     df.loc[df['Weight'].str.contains("Gross Vehicle Weight Rating:"), 'Weight'] = "--"
 
+    def classify_vehicle(row):
+        ## Needs refinement
+        if '--' in row['Weight']:
+            return '--'  
+        elif '' in row['Weight']:
+            return ''
+        elif '-' in row['Weight']:
+            min_weight, max_weight = [int(w.replace(',', '')) for w in row['Weight'].replace(' lb', '').split(' - ')]
+            weight = (min_weight + max_weight) / 2 
+        else:
+            weight = int(row['Weight'].split(' ')[0].replace(',', ''))
+        ####
+
+        if 'Invalid VIN' in row['Vehicle Type']:
+            return 'Invalid VIN'
+        elif 'TRAILER' in row['Vehicle Type']:
+            return 'Trailer'
+        elif 'Truck-Tractor' in row['Body Class'] or 'Semi' in row['Body Class']:
+            return 'Truck Tractor'
+        elif 'Trailer' in row['Body Class']:
+            return 'Trailer'
+        elif 'Bus' in row['Body Class']:
+            return 'Bus'
+        else:
+            weight = row['Weight'].split(' ')[0].replace(',', '')
+            weight = int(weight) if weight.isdigit() else 0
+            body_class = row['Body Class']
+            
+            if weight < 10000 and 'truck' not in body_class.lower() and 'pickup' not in body_class.lower() and 'cargo van' not in body_class.lower():
+                return 'Private Passengers'
+            elif 'cargo van' in body_class.lower():
+                return 'Cargo van'
+            elif weight <= 10000:
+                return 'Light truck'
+            elif 10000 < weight <= 20000:
+                return 'Medium Truck'
+            elif 20000 < weight <= 33000:
+                return 'Heavy Truck'
+            elif weight > 33000:
+                return 'Extra heavy Truck'
+            else:
+                return 'Other'
+
+    df['Classification'] = df.apply(classify_vehicle, axis=1)
 
     csv_filename = 'vehicle_data.csv'
     df.to_csv(csv_filename, index=False)
@@ -77,5 +121,3 @@ def submit():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-    # progress bar
