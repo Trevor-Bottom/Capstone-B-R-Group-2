@@ -70,6 +70,7 @@ def submit():
     df.loc[df['Weight'].str.contains("Gross Vehicle Weight Rating:"), 'Weight'] = "--"
 
     def classify_vehicle(row):
+
         if 'Invalid VIN' in row['Vehicle Type']:
             return 'Invalid VIN'
         elif 'TRAILER' in row['Vehicle Type']:
@@ -100,6 +101,7 @@ def submit():
             else:
                 return 'Other'
 
+
     df['Classification'] = df.apply(classify_vehicle, axis=1)
 
     csv_filename = 'vehicle_data.csv' # Edit this to change the output filename
@@ -109,3 +111,4 @@ def submit():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
