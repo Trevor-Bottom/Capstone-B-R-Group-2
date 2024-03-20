@@ -18,7 +18,7 @@ def scrape_vin_data(vin_numbers):
         vin_input.send_keys(vin)
         decode_button = driver.find_element(By.ID, "btnSubmit")
         decode_button.click()
-        time.sleep(0) 
+        time.sleep(0.5) 
 
         try:
             vehicle_type = driver.find_element(By.XPATH, "/html/body/div[2]/div[3]/div[2]/div/div[2]/div[2]/div[1]/p[3]").text
@@ -69,13 +69,43 @@ def submit():
     df.loc[df['Body Class'].str.contains("Body Class:"), 'Body Class'] = "--"
     df.loc[df['Weight'].str.contains("Gross Vehicle Weight Rating:"), 'Weight'] = "--"
 
+    def classify_vehicle(row):
+        if 'Invalid VIN' in row['Vehicle Type']:
+            return 'Invalid VIN'
+        elif 'TRAILER' in row['Vehicle Type']:
+            return 'Trailer'
+        elif 'Truck-Tractor' in row['Body Class'] or 'Semi' in row['Body Class']:
+            return 'Truck Tractor'
+        elif 'Trailer' in row['Body Class']:
+            return 'Trailer'
+        elif 'Bus' in row['Body Class']:
+            return 'Bus'
+        else:
+            weight = row['Weight'].split(' ')[0].replace(',', '')
+            weight = int(weight) if weight.isdigit() else 0
+            body_class = row['Body Class']
+            
+            if weight < 10000 and 'truck' not in body_class.lower() and 'pickup' not in body_class.lower() and 'cargo van' not in body_class.lower():
+                return 'Private Passengers'
+            elif 'cargo van' in body_class.lower():
+                return 'Cargo van'
+            elif weight <= 10000:
+                return 'Light truck'
+            elif 10000 < weight <= 20000:
+                return 'Medium Truck'
+            elif 20000 < weight <= 33000:
+                return 'Heavy Truck'
+            elif weight > 33000:
+                return 'Extra heavy Truck'
+            else:
+                return 'Other'
 
-    csv_filename = 'vehicle_data.csv'
+    df['Classification'] = df.apply(classify_vehicle, axis=1)
+
+    csv_filename = 'vehicle_data.csv' # Edit this to change the output filename
     df.to_csv(csv_filename, index=False)
 
     return send_file(csv_filename, as_attachment=True, mimetype='text/csv')
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-    # progress bar
