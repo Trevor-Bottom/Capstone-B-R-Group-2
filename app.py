@@ -50,6 +50,19 @@ def scrape_vin_data(vin_numbers):
     driver.quit()
     return df
 
+def clean_df(df):
+    df['Vehicle Type'] = df['Vehicle Type'].str.replace('Vehicle Type: ', '')
+    df['Body Class'] = df['Body Class'].str.replace('Body Class: ', '')
+    df['Weight'] = df['Weight'].str.replace('Gross Vehicle Weight Rating: ', '')
+    df['Weight'] = df['Weight'].str.replace(r'.*:\s+', '', regex=True)
+    df['Weight'] = df['Weight'].str.replace(r'\(.*?\)', '', regex=True).str.strip()
+
+    df.loc[df['Vehicle Type'].str.contains("Vehicle Type:"), 'Vehicle Type'] = "Invalid VIN"
+    df.loc[df['Vehicle Type'] == "Invalid VIN", ['Body Class', 'Weight']] = ""
+
+    df.loc[df['Body Class'].str.contains("Body Class:"), 'Body Class'] = "--"
+    df.loc[df['Weight'].str.contains("Gross Vehicle Weight Rating:"), 'Weight'] = "--"
+
 def read_excel(filepath):
     return pd.read_excel(filepath, sheet_name=1, header=None, names=['VIN'], usecols=[6], skiprows=4)
 
@@ -161,17 +174,7 @@ def submit():
     vin_numbers = vin_input.splitlines() 
     df = scrape_vin_data(vin_numbers)
 
-    df['Vehicle Type'] = df['Vehicle Type'].str.replace('Vehicle Type: ', '')
-    df['Body Class'] = df['Body Class'].str.replace('Body Class: ', '')
-    df['Weight'] = df['Weight'].str.replace('Gross Vehicle Weight Rating: ', '')
-    df['Weight'] = df['Weight'].str.replace(r'.*:\s+', '', regex=True)
-    df['Weight'] = df['Weight'].str.replace(r'\(.*?\)', '', regex=True).str.strip()
-
-    df.loc[df['Vehicle Type'].str.contains("Vehicle Type:"), 'Vehicle Type'] = "Invalid VIN"
-    df.loc[df['Vehicle Type'] == "Invalid VIN", ['Body Class', 'Weight']] = ""
-
-    df.loc[df['Body Class'].str.contains("Body Class:"), 'Body Class'] = "--"
-    df.loc[df['Weight'].str.contains("Gross Vehicle Weight Rating:"), 'Weight'] = "--"
+    
 
     f = request.files['file']
     filename = secure_filename(f.filename)
